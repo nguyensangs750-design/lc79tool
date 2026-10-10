@@ -3,715 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LC79 CLUB - All-In-One VIP Ecosystem</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>LC79 ALL-IN-ONE</title>
+    <!-- Thư viện Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b1118; color: #fff; padding: 15px; display: flex; justify-content: center; }
+        .main-card { background: #121d28; border: 1px solid #1e3144; border-radius: 12px; width: 100%; max-width: 900px; padding: 15px; box-shadow: 0 0 20px rgba(0, 255, 170, 0.1); }
         
-        @keyframes glowing {
-            0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), inset 0 0 5px rgba(16, 185, 129, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), inset 0 0 10px rgba(16, 185, 129, 0.4); }
-            100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), inset 0 0 5px rgba(16, 185, 129, 0.2); }
-        }
-        .glow-box { animation: glowing 3s infinite; }
+        /* Header Bar */
+        .header { display: flex; justify-content: space-between; align-items: center; background: #182635; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .logo { font-weight: bold; color: #00ffaa; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+        .timer { color: #ffcc00; font-size: 13px; }
+        .nav-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .btn-cyan { background: #00bcd4; color: #000; }
+        .btn-gold { background: #ffb300; color: #000; }
+        .btn-green { background: #00c853; color: #fff; }
+        .btn-orange { background: #ff6d00; color: #fff; }
+        .btn-purple { background: #6200ea; color: #fff; }
+        .btn:hover { opacity: 0.85; }
+
+        /* User Info Bar */
+        .user-bar { display: flex; justify-content: space-between; background: #152230; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 32px; height: 32px; background: #26384c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .balance { text-align: right; }
+        .balance-val { color: #ffcc00; font-weight: bold; font-size: 15px; }
+
+        /* Main Grid Layout */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
+
+        .panel { background: #182635; padding: 15px; border-radius: 8px; border: 1px solid #223548; }
         
-        @keyframes floatEffect {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-        .float-btn { animation: floatEffect 2s ease-in-out infinite; }
+        /* Soi cầu section */
+        .drop-zone { border: 2px dashed #2a415a; border-radius: 8px; padding: 20px; text-align: center; color: #8ba2bd; cursor: pointer; margin-bottom: 15px; font-size: 13px; }
+        .mode-selector { display: flex; margin-bottom: 15px; background: #0d1620; border-radius: 6px; overflow: hidden; }
+        .mode-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: bold; color: #8ba2bd; font-size: 13px; }
+        .mode-btn.active { background: #00c853; color: #fff; }
+
+        .result-box { display: flex; justify-content: space-around; background: #0d1620; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .res-item { flex: 1; }
+        .res-title { font-size: 12px; color: #8ba2bd; margin-bottom: 5px; }
+        .res-val { font-weight: bold; font-size: 18px; }
+
+        .status-box { background: #0d1620; padding: 10px; text-align: center; border-radius: 6px; color: #8ba2bd; margin-bottom: 12px; font-size: 13px; }
+        .btn-main-ai { width: 100%; padding: 12px; background: #00c853; color: #fff; font-weight: bold; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; }
+
+        /* Right Panel: Betting & Chat */
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; color: #8ba2bd; margin-bottom: 5px; }
+        .input-control { width: 100%; padding: 9px; background: #0d1620; border: 1px solid #223548; border-radius: 6px; color: #fff; font-weight: bold; }
+
+        .ai-recommend { background: #0d1620; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .ai-rec-val { background: #00c853; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+
+        .bet-btns { display: flex; gap: 10px; margin-bottom: 12px; }
+        .btn-bet { flex: 1; padding: 9px; border: none; border-radius: 6px; font-weight: bold; color: #fff; cursor: pointer; font-size: 13px; }
+        .btn-win { background: #00c853; }
+        .btn-lose { background: #d50000; }
+
+        /* Chat Box */
+        .chat-box { background: #0d1620; border-radius: 6px; padding: 10px; height: 140px; overflow-y: auto; font-size: 12px; margin-bottom: 10px; }
+        .chat-msg { margin-bottom: 6px; }
+        .chat-msg .sys { color: #00c853; font-weight: bold; }
+        .chat-input-wrap { display: flex; gap: 8px; }
+        .chat-input { flex: 1; padding: 8px 12px; background: #0d1620; border: 1px solid #223548; border-radius: 20px; color: #fff; font-size: 12px; }
+        .btn-send { background: #3d5aff; color: #fff; padding: 8px 15px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; }
+
+        /* Modal Auth / Admin */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 999; }
+        .modal-content { background: #182635; padding: 20px; border-radius: 12px; width: 90%; max-width: 450px; border: 1px solid #223548; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: #8ba2bd; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
+        .admin-table th, .admin-table td { border: 1px solid #223548; padding: 8px; text-align: left; word-break: break-all; }
+        .admin-table th { background: #0d1620; color: #00ffaa; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-screen overflow-hidden flex items-center justify-center p-2 relative">
+<body>
 
-    <!-- HIỆU ỨNG NỀN ĐỘNG -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
-    </div>
-
-    <!-- MODAL ĐĂNG NHẬP -->
-    <div id="login-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="w-[340px] bg-slate-900 border border-emerald-500/60 rounded-2xl p-4 shadow-2xl space-y-3 relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-black text-emerald-400 uppercase">🔑 Đăng Nhập Hệ Thống</h3>
-                <button onclick="closeModal('login-modal')" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition">✕</button>
-            </div>
-            <div class="space-y-2.5 pt-1">
-                <div>
-                    <label class="text-[10px] text-slate-400 mb-1 block">Tên tài khoản:</label>
-                    <input type="text" id="login-user" placeholder="Nhập tên tài khoản..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 mb-1 block">Mật khẩu:</label>
-                    <input type="password" id="login-pass" placeholder="Nhập mật khẩu..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                </div>
-            </div>
-            <div id="login-error" class="text-[10px] text-rose-400 hidden font-bold">⚠️ Tài khoản hoặc mật khẩu không đúng!</div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closeModal('login-modal')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">Hủy</button>
-                <button onclick="handleLogin()" class="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold rounded-xl transition shadow-lg shadow-emerald-900/40">Đăng Nhập</button>
-            </div>
-            <p class="text-[10px] text-center text-slate-400 pt-1">Chưa có tài khoản? <span onclick="switchModal('login-modal', 'register-modal')" class="text-amber-400 font-bold cursor-pointer hover:underline">Đăng ký ngay</span></p>
+<div class="main-card">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <span>●</span> LC79 ALL-IN-ONE <span class="timer">(58:08)</span>
+        </div>
+        <div class="nav-btns">
+            <button class="btn btn-cyan" onclick="openAuthModal('login')">Đăng Nhập</button>
+            <button class="btn btn-gold" onclick="openAuthModal('register')">Đăng Ký</button>
+            <button class="btn btn-green">💸 Nạp</button>
+            <button class="btn btn-orange">Mua Giờ</button>
+            <button class="btn btn-purple" onclick="openAdminPanel()">Admin</button>
         </div>
     </div>
 
-    <!-- MODAL ĐĂNG KÝ -->
-    <div id="register-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="w-[340px] bg-slate-900 border border-amber-500/60 rounded-2xl p-4 shadow-2xl space-y-3 relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-black text-amber-400 uppercase">📝 Đăng Ký Tài Khoản VIP</h3>
-                <button onclick="closeModal('register-modal')" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition">✕</button>
+    <!-- User Info Bar -->
+    <div class="user-bar">
+        <div class="user-info">
+            <div class="avatar">👤</div>
+            <div>
+                <div style="font-size: 11px; color: #8ba2bd;">TÀI KHOẢN</div>
+                <div style="font-weight: bold; color: #00c853;" id="disp-username">Chưa đăng nhập</div>
             </div>
-            <div class="space-y-2.5 pt-1">
-                <div>
-                    <label class="text-[10px] text-slate-400 mb-1 block">Tên tài khoản mới:</label>
-                    <input type="text" id="reg-user" placeholder="Chọn tên tài khoản..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 mb-1 block">Mật khẩu:</label>
-                    <input type="password" id="reg-pass" placeholder="Tạo mật khẩu..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
-                </div>
-            </div>
-            <div id="reg-error" class="text-[10px] text-rose-400 hidden font-bold">⚠️ Vui lòng điền đầy đủ thông tin!</div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closeModal('register-modal')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">Hủy</button>
-                <button onclick="handleRegister()" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-xs font-extrabold rounded-xl transition shadow-lg shadow-amber-900/40">Đăng Ký</button>
-            </div>
-            <p class="text-[10px] text-center text-slate-400 pt-1">Đã có tài khoản? <span onclick="switchModal('register-modal', 'login-modal')" class="text-emerald-400 font-bold cursor-pointer hover:underline">Đăng nhập</span></p>
+        </div>
+        <div class="balance">
+            <div style="font-size: 11px; color: #8ba2bd;">SỐ DƯ VÍ (NẠP ↗)</div>
+            <div class="balance-val">5.000 VNĐ</div>
         </div>
     </div>
 
-    <!-- MODAL MUA THỜI GIAN CHƠI -->
-    <div id="bank-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="w-[360px] bg-slate-900 border border-amber-500/60 rounded-2xl p-4 shadow-2xl space-y-3 relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-yellow-300"></div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-black text-amber-400 uppercase">⚡ Mua Gói Thời Gian Chơi</h3>
-                <button onclick="closeModal('bank-modal')" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition">✕</button>
+    <!-- Main Grid Content -->
+    <div class="grid-container">
+        <!-- Panel Trái: Soi Cầu AI -->
+        <div class="panel">
+            <div class="drop-zone" onclick="alert('Tính năng quét ảnh soi cầu đang sẵn sàng!')">
+                📁 <b>Chọn file ảnh cầu soi</b><br>
+                <span style="font-size: 11px; color: #577390;">Click & dán ảnh</span>
             </div>
-            <p class="text-[11px] text-slate-300">Chọn gói thời gian bạn muốn gia hạn:</p>
-            <div class="grid grid-cols-3 gap-2">
-                <div onclick="selectPackage('Gói 1 Giờ', 10000)" class="package-card bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-amber-500 cursor-pointer text-center transition">
-                    <p class="text-[11px] font-bold text-amber-400">1 Giờ</p>
-                    <p class="text-[11px] font-black text-white">10.000đ</p>
+
+            <div class="mode-selector">
+                <div class="mode-btn active">Tài Xỉu VIP</div>
+                <div class="mode-btn">Xóc Đĩa VIP</div>
+            </div>
+
+            <div class="result-box">
+                <div class="res-item">
+                    <div class="res-title">🔵 TÀI</div>
+                    <div class="res-val" id="val-tai" style="color: #00bcd4;">-- %</div>
                 </div>
-                <div onclick="selectPackage('Gói 3 Giờ', 25000)" class="package-card bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-amber-500 cursor-pointer text-center transition">
-                    <p class="text-[11px] font-bold text-amber-400">3 Giờ</p>
-                    <p class="text-[11px] font-black text-white">25.000đ</p>
-                </div>
-                <div onclick="selectPackage('Gói 5 Giờ', 40000)" class="package-card bg-slate-950 p-2.5 rounded-xl border border-emerald-500 hover:border-emerald-400 cursor-pointer text-center bg-emerald-950/20 transition">
-                    <p class="text-[11px] font-bold text-emerald-400">5 Giờ 🔥</p>
-                    <p class="text-[11px] font-black text-white">40.000đ</p>
+                <div class="res-item">
+                    <div class="res-title">🔴 XỈU</div>
+                    <div class="res-val" id="val-xiu" style="color: #ff1744;">-- %</div>
                 </div>
             </div>
-            <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1 text-xs">
-                <p class="text-slate-300">📦 Đã chọn: <strong id="selected-pkg-name" class="text-amber-400">Chưa chọn</strong></p>
-                <p class="text-slate-300">💰 Tổng tiền: <strong id="selected-pkg-price" class="text-white">0 VNĐ</strong></p>
+
+            <div class="status-box" id="ai-status">Đang chờ quét cầu...</div>
+            <div style="font-size: 11px; color: #8ba2bd; text-align: center; margin-bottom: 12px;">
+                Nhận định AI: <span style="color: #00c853; font-weight: bold;">Sẵn sàng phân tích</span>
             </div>
-            <div class="flex space-x-2 pt-1">
-                <button onclick="closeModal('bank-modal')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">Hủy</button>
-                <button onclick="confirmBuyPackage()" class="flex-1 py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-xs font-extrabold rounded-xl transition shadow-lg shadow-amber-900/40">Thanh Toán</button>
+            <button class="btn-main-ai" onclick="runAIScan()">⚡ Quét Thuật Toán AI Tài Xỉu</button>
+        </div>
+
+        <!-- Panel Phải: Cược & Chat VIP -->
+        <div class="panel">
+            <div class="input-group">
+                <label>Số vốn hiện có (VNĐ):</label>
+                <input type="text" class="input-control" value="5000">
+            </div>
+
+            <div class="ai-recommend">
+                <span style="font-size: 12px; color: #8ba2bd;">🤖 AI Khuyên Cược:</span>
+                <span class="ai-rec-val">50 VNĐ (1%)</span>
+            </div>
+
+            <div class="bet-btns">
+                <button class="btn-bet btn-win" onclick="alert('Đã ghi nhận cược THẮNG!')">✔ Thắng</button>
+                <button class="btn-bet btn-lose" onclick="alert('Đã ghi nhận cược THUA!')">✖ Thua</button>
+            </div>
+
+            <div style="font-size: 12px; color: #8ba2bd; margin-bottom: 6px;">💬 KHUNG CHAT VIP <span style="color: #00c853;">• ONLINE SERVER</span></div>
+            <div class="chat-box" id="chat-box">
+                <div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>
+            </div>
+            <div class="chat-input-wrap">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Nhập nội dung...">
+                <button class="btn-send" onclick="sendChatMessage()">Gửi</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #577390; margin-top: 15px;">
+                <span>Hỗ trợ: <b style="color: #00bcd4;">@Ngocvotool</b></span>
+                <span style="color: #00c853; cursor: pointer;">Nạp Tiền Nhanh ↗</span>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- MODAL NẠP TIỀN -->
-    <div id="deposit-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="w-[330px] bg-slate-900 border border-emerald-500/60 rounded-2xl p-4 shadow-2xl space-y-3 text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-400"></div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wide">💎 Nạp Tiền & Nhận KM</h3>
-                <button onclick="closeModal('deposit-modal')" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition">✕</button>
-            </div>
-            <div class="py-2 space-y-3">
-                <div class="w-12 h-12 bg-emerald-500/20 border border-emerald-500/50 rounded-full flex items-center justify-center mx-auto text-emerald-400 font-bold text-xl animate-bounce">💸</div>
-                <p class="text-xs text-slate-300">Nạp tiền siêu tốc 24/7, liên hệ trực tiếp Telegram để nhận ưu đãi:</p>
-                <div class="bg-slate-950 py-2.5 px-3 rounded-xl border border-emerald-500/30 shadow-inner">
-                    <p class="text-[10px] text-slate-400 mb-0.5">Hỗ trợ chính thức:</p>
-                    <a href="https://t.me/Ngocvotool" target="_blank" class="text-sm font-black text-amber-400 hover:underline">@Ngocvotool</a>
-                </div>
-            </div>
-            <div class="flex space-x-2">
-                <a href="https://t.me/Ngocvotool" target="_blank" class="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold rounded-xl transition shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-1">
-                    🚀 Mở Telegram Ngay
-                </a>
-                <button onclick="closeModal('deposit-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">Đóng</button>
-            </div>
+<!-- Modal Đăng Nhập / Đăng Ký -->
+<div class="modal" id="auth-modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('auth-modal')">&times;</span>
+        <h3 id="modal-title" style="margin-bottom: 15px; color: #00ffaa; text-align: center;">Đăng Nhập</h3>
+        <div class="input-group">
+            <label>Tên tài khoản:</label>
+            <input type="text" id="auth-username" class="input-control" placeholder="Nhập tài khoản...">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="auth-password" class="input-control" placeholder="Nhập mật khẩu...">
+        </div>
+        <button class="btn-main-ai" onclick="submitAuth()" style="margin-top: 10px;">Xác Nhận</button>
+        <div id="auth-msg" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
+    </div>
+</div>
+
+<!-- Modal Admin Dashboard (Toàn Server) -->
+<div class="modal" id="admin-modal">
+    <div class="modal-content" style="max-width: 650px;">
+        <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
+        <h3 style="color: #ff1744; text-align: center; margin-bottom: 10px;">👑 Quản Trị Server (Realtime)</h3>
+        <p style="font-size: 12px; color: #8ba2bd; text-align: center; margin-bottom: 15px;">Danh sách tất cả tài khoản đăng ký từ máy tính & điện thoại khác nhau</p>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Tài Khoản</th>
+                        <th>Mật Khẩu</th>
+                        <th>Mã Thiết Bị (Device ID)</th>
+                        <th>Ngày Tạo</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-list">
+                    <!-- Dữ liệu từ Server -->
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <!-- MODAL XÁC THỰC ADMIN -->
-    <div id="admin-login-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="w-[320px] bg-slate-900 border border-indigo-500/60 rounded-2xl p-4 shadow-2xl space-y-3 relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-xs font-black text-indigo-400 uppercase">🔒 Xác Thực Quản Trị</h3>
-                <button onclick="closeModal('admin-login-modal')" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition">✕</button>
-            </div>
-            <p class="text-[11px] text-slate-300">Nhập thông tin quản trị để vào trang Admin:</p>
-            <div class="space-y-2">
-                <input type="text" id="admin-username-input" placeholder="Tên tài khoản..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                <input type="password" id="admin-code-input" placeholder="Mã bảo mật..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-            </div>
-            <div id="admin-error-msg" class="text-[10px] text-rose-400 hidden font-bold">⚠️ Thông tin xác thực không chính xác!</div>
-            <div class="flex space-x-2 pt-1">
-                <button onclick="closeModal('admin-login-modal')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition">Hủy</button>
-                <button onclick="verifyAdminLogin()" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-indigo-900/40">Xác Nhận</button>
-            </div>
-        </div>
-    </div>
+<!-- Cấu hình Firebase Server Trực Tiếp Chạy Luôn (Không Lỗi) -->
+<script>
+    // Database Server Cloud dùng chung đã cấu hình sẵn hoạt động ngay lập tức
+    const firebaseConfig = {
+        databaseURL: "https://lc79top-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
 
-    <!-- GIAO DIỆN CHÍNH (TOOL & ACC) -->
-    <div id="main-widget" class="absolute top-4 left-4 w-[740px] bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden select-none z-40 glow-box transition-all">
-        
-        <!-- Thanh tiêu đề (Drag & Drop) -->
-        <div id="acc-header" class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-3.5 py-3 flex items-center justify-between cursor-move border-b border-slate-800">
-            <div class="flex items-center space-x-2.5">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
-                <span class="font-extrabold text-xs tracking-wider text-emerald-400 uppercase">LC79 ALL-IN-ONE (<span id="trial-timer" class="text-yellow-300 font-mono font-bold">10:00</span>)</span>
-            </div>
-            <div class="flex items-center space-x-1.5" onmousedown="event.stopPropagation()">
-                <button onclick="zoomUI(0.05)" class="text-slate-300 hover:text-white text-[10px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 transition">+</button>
-                <button onclick="zoomUI(-0.05)" class="text-slate-300 hover:text-white text-[10px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 transition">-</button>
-                <button onclick="openModal('login-modal')" class="text-cyan-300 hover:text-white text-[9px] px-2 py-1 rounded-lg bg-cyan-950/80 border border-cyan-500/50 font-bold">Đăng Nhập</button>
-                <button onclick="openModal('register-modal')" class="text-amber-300 hover:text-white text-[9px] px-2 py-1 rounded-lg bg-amber-950/80 border border-amber-500/50 font-bold">Đăng Ký</button>
-                <button onclick="openModal('deposit-modal')" class="text-emerald-300 hover:text-white text-[9px] px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 border border-emerald-500/50 font-black float-btn shadow-md">💸 Nạp</button>
-                <button onclick="openModal('bank-modal')" class="text-yellow-300 hover:text-white text-[9px] px-2 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-600 border border-amber-500/50 font-bold">Mua Giờ</button>
-                <button onclick="openModal('admin-login-modal')" class="text-indigo-300 hover:text-white text-[9px] px-2 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/50 font-bold">Admin</button>
-            </div>
-        </div>
+    // Khởi tạo kết nối Realtime
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        <!-- BỐ CỤC 2 CỘT -->
-        <div class="p-3.5 grid grid-cols-2 gap-3.5 max-h-[85vh] overflow-y-auto">
-            
-            <!-- CỘT 1 -->
-            <div class="space-y-3">
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 flex justify-between items-center shadow-inner">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold border border-emerald-500/40 shadow">👤</div>
-                        <div>
-                            <p class="text-[9px] text-slate-400 uppercase font-semibold">Tài khoản</p>
-                            <p id="current-username-display" class="text-xs font-extrabold text-emerald-400">Khách</p>
-                        </div>
-                    </div>
-                    <div class="text-right cursor-pointer group" onclick="openModal('deposit-modal')" title="Bấm để nạp tiền">
-                        <p class="text-[9px] text-slate-400 uppercase font-semibold group-hover:text-emerald-400 transition">Số dư ví (Nạp ↗)</p>
-                        <p id="user-wallet-balance" class="text-xs font-black text-amber-400">5.000 VNĐ</p>
-                    </div>
-                </div>
+    let currentAuthMode = 'login';
+    let loggedUser = localStorage.getItem('lc79_logged_user') || null;
 
-                <!-- Ảnh cầu -->
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-2.5">
-                    <div class="flex items-center space-x-2">
-                        <input type="file" id="screenshot-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                        <button onclick="document.getElementById('screenshot-input').click()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-emerald-500 text-slate-300 text-[11px] font-semibold rounded-xl transition truncate px-2 shadow">
-                            📁 <span id="file-name-display">Chọn file ảnh cầu soi</span>
-                        </button>
-                    </div>
-                    <div id="paste-zone" contenteditable="true" class="w-full bg-slate-900/60 border border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-2.5 text-center text-[10px] text-slate-400 focus:outline-none transition">
-                        📋 Click & nhấn <strong class="text-emerald-400 font-bold">Ctrl + V</strong> dán ảnh
-                    </div>
-                    <div id="image-preview-container" class="hidden relative w-full bg-slate-900 rounded-xl border border-slate-800 p-2 space-y-2">
-                        <div class="flex justify-between items-center text-[10px] text-slate-400">
-                            <span class="font-semibold text-slate-300">🔍 Xem trước ảnh:</span>
-                            <button onclick="clearImage()" class="bg-rose-600 hover:bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-lg font-bold transition">Xóa</button>
-                        </div>
-                        <div class="w-full h-20 overflow-auto bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-center p-1">
-                            <img id="preview-img" src="" alt="Ảnh soi" class="object-contain max-h-full">
-                        </div>
-                    </div>
-                </div>
+    if (loggedUser) {
+        document.getElementById('disp-username').innerText = loggedUser;
+    }
 
-                <!-- Tabs -->
-                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-                    <button onclick="switchTab('tai-xiu')" id="tab-btn-taoxiu" class="flex-1 py-1.5 text-[11px] font-extrabold rounded-lg bg-emerald-600 text-white transition shadow">Tài Xỉu VIP</button>
-                    <button onclick="switchTab('xoc-dia')" id="tab-btn-xocdia" class="flex-1 py-1.5 text-[11px] font-extrabold rounded-lg text-slate-400 hover:text-white transition">Xóc Đĩa VIP</button>
-                </div>
+    // Mã định danh thiết bị độc lập (Device ID)
+    let deviceId = localStorage.getItem('lc79_device_id');
+    if (!deviceId) {
+        deviceId = 'device_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+        localStorage.setItem('lc79_device_id', deviceId);
+    }
 
-                <!-- Tài Xỉu -->
-                <div id="tab-tai-xiu" class="space-y-2.5">
-                    <div class="grid grid-cols-2 gap-2 text-center">
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow">
-                            <p class="text-[10px] text-slate-400 mb-0.5 font-semibold">🔵 TÀI</p>
-                            <div id="tai-percent" class="text-base font-black text-cyan-400">--%</div>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow">
-                            <p class="text-[10px] text-slate-400 mb-0.5 font-semibold">🔴 XỈU</p>
-                            <div id="xiu-percent" class="text-base font-black text-rose-400">--%</div>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div id="history-grid-tx" class="grid grid-cols-8 gap-1.5 p-1.5 bg-slate-900 rounded-xl border border-slate-800 min-h-[48px] items-center justify-items-center">
-                            <span class="text-[10px] text-slate-500 col-span-8 py-1">Đang chờ quét cầu...</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <span class="text-[10px] text-slate-400">Nhận định AI: </span>
-                        <span id="tai-xiu-result" class="text-[11px] font-bold text-emerald-400">Sẵn sàng phân tích</span>
-                    </div>
-                    <button id="analyze-btn-tx" onclick="triggerAnalyze('tai-xiu')" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[11px] font-extrabold rounded-xl transition shadow-lg shadow-emerald-900/40">
-                        ⚡ Quét Thuật Toán AI Tài Xỉu
-                    </button>
-                </div>
+    function openAuthModal(mode) {
+        currentAuthMode = mode;
+        document.getElementById('modal-title').innerText = mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký (Tối đa 2 TK/thiết bị)';
+        document.getElementById('auth-msg').innerText = '';
+        document.getElementById('auth-modal').style.display = 'flex';
+    }
 
-                <!-- Xóc Đĩa -->
-                <div id="tab-xoc-dia" class="hidden space-y-2.5">
-                    <div class="grid grid-cols-2 gap-2 text-center">
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow">
-                            <p class="text-[10px] text-slate-400 mb-0.5 font-semibold">⚪ CHẴN</p>
-                            <div id="chan-percent" class="text-base font-black text-amber-400">--%</div>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 shadow">
-                            <p class="text-[10px] text-slate-400 mb-0.5 font-semibold">⚫ LẺ</p>
-                            <div id="le-percent" class="text-base font-black text-purple-400">--%</div>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <div id="history-grid-xd" class="grid grid-cols-8 gap-1.5 p-1.5 bg-slate-900 rounded-xl border border-slate-800 min-h-[48px] items-center justify-items-center">
-                            <span class="text-[10px] text-slate-500 col-span-8 py-1">Đang chờ quét Xóc Đĩa...</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <span class="text-[10px] text-slate-400">Nhận định AI: </span>
-                        <span id="xoc-dia-result" class="text-[11px] font-bold text-amber-400">Sẵn sàng phân tích</span>
-                    </div>
-                    <button id="analyze-btn-xd" onclick="triggerAnalyze('xoc-dia')" class="w-full py-2.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white text-[11px] font-extrabold rounded-xl transition shadow-lg shadow-amber-900/40">
-                        ⚡ Quét Thuật Toán Xóc Đĩa
-                    </button>
-                </div>
-            </div>
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
 
-            <!-- CỘT 2 -->
-            <div class="space-y-3 flex flex-col justify-between">
-                <div class="space-y-3">
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-2.5 shadow-inner">
-                        <div class="space-y-1">
-                            <label class="text-[10px] text-slate-400">Số vốn hiện có (VNĐ):</label>
-                            <input type="number" id="user-capital" value="5000" oninput="calculateAICurrency()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-yellow-400 font-extrabold focus:outline-none focus:border-emerald-500">
-                        </div>
-                        <div class="flex items-center justify-between text-[11px]">
-                            <span class="text-slate-400">🤖 AI Khuyên Cược:</span>
-                            <span id="ai-bet-amount" class="font-extrabold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800/50">50 VNĐ (1%)</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="handleWin()" class="py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-extrabold rounded-xl transition shadow">✅ Thắng</button>
-                            <button onclick="handleLoss()" class="py-2 bg-rose-700 hover:bg-rose-600 text-white text-[11px] font-extrabold rounded-xl transition shadow">❌ Thua</button>
-                        </div>
-                    </div>
+    // Xử lý Đăng ký / Đăng nhập trực tuyến Server
+    function submitAuth() {
+        const u = document.getElementById('auth-username').value.trim();
+        const p = document.getElementById('auth-password').value.trim();
+        const msg = document.getElementById('auth-msg');
 
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-2.5 shadow-inner">
-                        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                            <span>💬 Khung Chat VIP</span>
-                            <span class="text-emerald-400 text-[9px] animate-pulse">● Online</span>
-                        </p>
-                        <div id="chat-messages" class="h-44 bg-slate-900 rounded-xl p-2.5 overflow-y-auto space-y-2 text-[11px] border border-slate-800">
-                            <p class="text-slate-400"><strong class="text-emerald-400">System:</strong> Chào mừng bạn tham gia hệ thống LC79!</p>
-                        </div>
-                        <div class="flex space-x-2">
-                            <input type="text" id="chat-input" placeholder="Nhập nội dung..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500" onkeypress="handleChatKeyPress(event)">
-                            <button onclick="sendChatMessage()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-extrabold rounded-xl transition shadow">Gửi</button>
-                        </div>
-                    </div>
-                </div>
+        if (!u || !p) {
+            msg.style.color = '#ff1744';
+            msg.innerText = 'Vui lòng nhập đầy đủ tài khoản & mật khẩu!';
+            return;
+        }
 
-                <div class="text-center pt-1 flex justify-between items-center px-1 text-[10px] text-slate-400">
-                    <span class="font-bold">Hỗ trợ: <a href="https://t.me/Ngocvotool" target="_blank" class="text-amber-400 hover:underline">@Ngocvotool</a></span>
-                    <button onclick="openModal('deposit-modal')" class="text-emerald-400 underline font-extrabold">Nạp Tiền Nhanh ↗</button>
-                </div>
-            </div>
+        const usersRef = db.ref('users');
 
-        </div>
-    </div>
+        if (currentAuthMode === 'register') {
+            // Kiểm tra giới hạn 2 tài khoản trên cùng thiết bị này
+            usersRef.orderByChild('deviceId').equalTo(deviceId).once('value', snapshot => {
+                let devCount = 0;
+                snapshot.forEach(() => devCount++);
 
-    <!-- GIAO DIỆN QUẢN TRỊ ADMIN (Ẩn mặc định) -->
-    <div id="admin-dashboard" class="hidden absolute inset-4 bg-slate-900/98 backdrop-blur-2xl border border-indigo-500/40 rounded-3xl shadow-2xl overflow-hidden z-50 flex flex-col">
-        <div class="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-950 px-6 py-4 flex items-center justify-between border-b border-indigo-500/30">
-            <div class="flex items-center space-x-3">
-                <span class="w-3.5 h-3.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                <h2 class="text-sm font-black text-indigo-400 uppercase tracking-wider">⚡ LC79 CLUB - HỆ THỐNG QUẢN TRỊ ADMIN</h2>
-            </div>
-            <button onclick="closeAdminDashboard()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition">✕ Thoát Admin</button>
-        </div>
-        <div class="p-6 flex-1 overflow-y-auto space-y-6">
-            <div class="grid grid-cols-4 gap-4">
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                    <p class="text-xs text-slate-400 font-semibold">Tổng User Online</p>
-                    <p class="text-2xl font-black text-emerald-400">1,248</p>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                    <p class="text-xs text-slate-400 font-semibold">Doanh Thu Ngày</p>
-                    <p class="text-2xl font-black text-amber-400">4,850,000đ</p>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                    <p class="text-xs text-slate-400 font-semibold">Mã Key Hoạt Động</p>
-                    <p class="text-2xl font-black text-indigo-400">326</p>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                    <p class="text-xs text-slate-400 font-semibold">Hỗ Trợ</p>
-                    <p class="text-2xl font-black text-cyan-400">@Ngocvotool</p>
-                </div>
-            </div>
-            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-black text-slate-200 uppercase">🔑 Quản Lý Mã Key & Tài Khoản</h3>
-                    <button onclick="alert('Đã tạo key thành công!')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition">+ Tạo Key Mới</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
-                            <tr>
-                                <th class="p-3">Mã Key</th>
-                                <th class="p-3">Gói Cước</th>
-                                <th class="p-3">Trạng Thái</th>
-                                <th class="p-3">Người Kích Hoạt</th>
-                                <th class="p-3 text-right">Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800 text-slate-300">
-                            <tr>
-                                <td class="p-3 font-mono text-emerald-400 font-bold">LC79-VIP-88992</td>
-                                <td class="p-3">5 Giờ</td>
-                                <td class="p-3"><span class="px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded text-[10px] font-bold">Đang dùng</span></td>
-                                <td class="p-3" id="admin-active-user-row">sangoday</td>
-                                <td class="p-3 text-right space-x-2">
-                                    <button onclick="alert('Đã khóa key!')" class="text-rose-400 hover:underline">Khóa</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let isCooldown = false;
-        let uiScale = 1;
-        let aiMultiplierStep = 1;
-        let selectedPackagePrice = 0;
-        let selectedPackageNameText = "";
-
-        // Khởi tạo tài khoản từ localStorage hoặc mặc định
-        let currentUser = localStorage.getItem('lc79_current_user') || 'Khách';
-        document.getElementById('current-username-display').innerText = currentUser;
-
-        let trialSeconds = localStorage.getItem('lc79_trial_seconds');
-        trialSeconds = trialSeconds === null ? 600 : parseInt(trialSeconds);
-
-        const widget = document.getElementById('main-widget');
-        const previewImg = document.getElementById('preview-img');
-
-        function startTrialCountdown() {
-            setInterval(() => {
-                if (trialSeconds > 0) {
-                    trialSeconds--;
-                    localStorage.setItem('lc79_trial_seconds', trialSeconds);
-                    let m = Math.floor(trialSeconds / 60);
-                    let s = trialSeconds % 60;
-                    document.getElementById('trial-timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                } else {
-                    document.getElementById('trial-timer').innerText = "Hết giờ";
+                if (devCount >= 2) {
+                    msg.style.color = '#ff1744';
+                    msg.innerText = '❌ Thiết bị này đã đạt giới hạn tối đa (2 tài khoản)!';
+                    return;
                 }
-            }, 1000);
-        }
-        startTrialCountdown();
 
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-            if(modalId === 'admin-login-modal') {
-                document.getElementById('admin-username-input').value = '';
-                document.getElementById('admin-code-input').value = '';
-                document.getElementById('admin-error-msg').classList.add('hidden');
-            }
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function switchModal(fromId, toId) {
-            closeModal(fromId);
-            openModal(toId);
-        }
-
-        // Xử lý Đăng Ký
-        function handleRegister() {
-            let u = document.getElementById('reg-user').value.trim();
-            let p = document.getElementById('reg-pass').value.trim();
-            let err = document.getElementById('reg-error');
-            if(!u || !p) {
-                err.classList.remove('hidden');
-                return;
-            }
-            localStorage.setItem('lc79_user_' + u, p);
-            alert('🎉 Đăng ký thành công! Hãy tiến hành đăng nhập.');
-            closeModal('register-modal');
-            openModal('login-modal');
-            document.getElementById('login-user').value = u;
-        }
-
-        // Xử lý Đăng Nhập
-        function handleLogin() {
-            let u = document.getElementById('login-user').value.trim();
-            let p = document.getElementById('login-pass').value.trim();
-            let err = document.getElementById('login-error');
-            
-            // Tài khoản mặc định hoặc lấy từ localStorage
-            let savedPass = localStorage.getItem('lc79_user_' + u);
-            if((u === 'sangoday' && p === '231020100') || (savedPass && savedPass === p)) {
-                currentUser = u;
-                localStorage.setItem('lc79_current_user', u);
-                document.getElementById('current-username-display').innerText = u;
-                closeModal('login-modal');
-                alert('✅ Đăng nhập thành công tài khoản: ' + u);
-            } else {
-                err.classList.remove('hidden');
-            }
-        }
-
-        function verifyAdminLogin() {
-            let inputName = document.getElementById('admin-username-input').value.trim();
-            let inputCode = document.getElementById('admin-code-input').value.trim();
-            let errorMsg = document.getElementById('admin-error-msg');
-
-            if ((inputName === "sangoday" || inputName === "admin") && inputCode === "231020100") {
-                closeModal('admin-login-modal');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-            } else {
-                errorMsg.classList.remove('hidden');
-            }
-        }
-
-        function closeAdminDashboard() {
-            document.getElementById('admin-dashboard').classList.add('hidden');
-        }
-
-        function selectPackage(name, price) {
-            selectedPackageNameText = name;
-            selectedPackagePrice = price;
-            document.getElementById('selected-pkg-name').innerText = name;
-            document.getElementById('selected-pkg-price').innerText = price.toLocaleString('vi-VN') + " VNĐ";
-        }
-
-        function confirmBuyPackage() {
-            if (selectedPackagePrice === 0) {
-                alert("⚠️ Vui lòng chọn gói thời gian chơi trước!");
-                return;
-            }
-            if (confirm(`✅ Xác nhận mua ${selectedPackageNameText} (${selectedPackagePrice.toLocaleString('vi-VN')} VNĐ).\nBấm OK để liên hệ trực tiếp Telegram @Ngocvotool nhận mã kích hoạt!`)) {
-                window.open('https://t.me/Ngocvotool', '_blank');
-            }
-            closeModal('bank-modal');
-        }
-
-        function calculateAICurrency() {
-            let capital = parseFloat(document.getElementById('user-capital').value) || 0;
-            let percentRate = 0.01;
-            if (aiMultiplierStep === 2) percentRate = 0.02;
-            if (aiMultiplierStep === 3) percentRate = 0.03;
-            if (aiMultiplierStep >= 4) percentRate = 0.05;
-
-            let suggestedAmount = Math.round(capital * percentRate);
-            document.getElementById('ai-bet-amount').innerText = `${suggestedAmount.toLocaleString('vi-VN')} VNĐ (${Math.round(percentRate*100)}%)`;
-        }
-
-        function handleWin() {
-            aiMultiplierStep = 1;
-            calculateAICurrency();
-        }
-
-        function handleLoss() {
-            if (aiMultiplierStep < 4) aiMultiplierStep++;
-            calculateAICurrency();
-        }
-
-        function zoomUI(amount) {
-            uiScale += amount;
-            if (uiScale < 0.7) uiScale = 0.7;
-            if (uiScale > 1.2) uiScale = 1.2;
-            widget.style.transform = `scale(${uiScale})`;
-        }
-
-        function displayImagePreview(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                document.getElementById('image-preview-container').classList.remove('hidden');
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function clearImage() {
-            document.getElementById('image-preview-container').classList.add('hidden');
-            previewImg.src = '';
-            document.getElementById('file-name-display').innerText = "Chọn file ảnh cầu soi";
-        }
-
-        const pasteZone = document.getElementById('paste-zone');
-        pasteZone.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const file = items[i].getAsFile();
-                    if (file) {
-                        displayImagePreview(file);
-                        pasteZone.innerHTML = `✅ <strong class="text-emerald-400">Đã dán ảnh thành công!</strong>`;
+                // Kiểm tra trùng tên tài khoản trên Server
+                usersRef.orderByChild('username').equalTo(u).once('value', userSnap => {
+                    if (userSnap.exists()) {
+                        msg.style.color = '#ff1744';
+                        msg.innerText = '❌ Tên tài khoản này đã có người đăng ký!';
+                    } else {
+                        // Tạo tài khoản mới lên Server
+                        usersRef.push({
+                            username: u,
+                            password: p,
+                            deviceId: deviceId,
+                            createdAt: new Date().toLocaleString()
+                        }).then(() => {
+                            msg.style.color = '#00c853';
+                            msg.innerText = '✔ Đăng ký thành công!';
+                            loggedUser = u;
+                            localStorage.setItem('lc79_logged_user', u);
+                            document.getElementById('disp-username').innerText = u;
+                            setTimeout(() => closeModal('auth-modal'), 800);
+                        });
                     }
-                    break;
+                });
+            });
+        } else {
+            // Xử lý Đăng nhập
+            usersRef.orderByChild('username').equalTo(u).once('value', snapshot => {
+                if (!snapshot.exists()) {
+                    msg.style.color = '#ff1744';
+                    msg.innerText = '❌ Tài khoản không tồn tại trên hệ thống!';
+                    return;
                 }
-            }
+                let isValid = false;
+                snapshot.forEach(child => {
+                    if (child.val().password === p) {
+                        isValid = true;
+                    }
+                });
+
+                if (isValid) {
+                    msg.style.color = '#00c853';
+                    msg.innerText = '✔ Đăng nhập thành công!';
+                    loggedUser = u;
+                    localStorage.setItem('lc79_logged_user', u);
+                    document.getElementById('disp-username').innerText = u;
+                    setTimeout(() => closeModal('auth-modal'), 800);
+                } else {
+                    msg.style.color = '#ff1744';
+                    msg.innerText = '❌ Sai mật khẩu!';
+                }
+            });
+        }
+    }
+
+    // Mở Bảng Quản Trị Admin Server
+    function openAdminPanel() {
+        if (!loggedUser || loggedUser.toLowerCase() !== 'admin') {
+            alert('🔒 Bạn phải Đăng nhập tài khoản "admin" để mở Bảng Quản Trị Server!');
+            openAuthModal('login');
+            return;
+        }
+
+        document.getElementById('admin-modal').style.display = 'flex';
+        // Lấy dữ liệu Realtime toàn server
+        db.ref('users').on('value', snapshot => {
+            const tbody = document.getElementById('admin-user-list');
+            tbody.innerHTML = '';
+            snapshot.forEach(child => {
+                const data = child.val();
+                tbody.innerHTML += `<tr>
+                    <td style="color:#00ffaa; font-weight:bold;">${data.username}</td>
+                    <td>${data.password}</td>
+                    <td style="font-size:10px; color:#8ba2bd;">${data.deviceId}</td>
+                    <td>${data.createdAt}</td>
+                </tr>`;
+            });
         });
+    }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('file-name-display').innerText = file.name;
-                displayImagePreview(file);
-            }
-        }
+    // Chạy giả lập Quét AI Soi Cầu
+    function runAIScan() {
+        const status = document.getElementById('ai-status');
+        const tai = document.getElementById('val-tai');
+        const xiu = document.getElementById('val-xiu');
+        
+        status.innerText = '🔄 Đang phân tích thuật toán AI...';
+        setTimeout(() => {
+            let t = Math.floor(Math.random() * 40) + 30;
+            let x = 100 - t;
+            tai.innerText = t + '%';
+            xiu.innerText = x + '%';
+            status.innerText = t > x ? '✅ AI Dự Báo: Báo TÀI' : '✅ AI Dự Báo: Báo XỈU';
+        }, 1200);
+    }
 
-        function switchTab(tab) {
-            const taiXiuTab = document.getElementById('tab-tai-xiu');
-            const xocDiaTab = document.getElementById('tab-xoc-dia');
-            const btnTaiXiu = document.getElementById('tab-btn-taoxiu');
-            const btnXocDia = document.getElementById('tab-btn-xocdia');
-
-            if (tab === 'tai-xiu') {
-                taiXiuTab.classList.remove('hidden');
-                xocDiaTab.classList.add('hidden');
-                btnTaiXiu.className = "flex-1 py-1.5 text-[11px] font-extrabold rounded-lg bg-emerald-600 text-white transition shadow";
-                btnXocDia.className = "flex-1 py-1.5 text-[11px] font-extrabold rounded-lg text-slate-400 hover:text-white transition";
-            } else {
-                taiXiuTab.classList.add('hidden');
-                xocDiaTab.classList.remove('hidden');
-                btnXocDia.className = "flex-1 py-1.5 text-[11px] font-extrabold rounded-lg bg-amber-600 text-white transition shadow";
-                btnTaiXiu.className = "flex-1 py-1.5 text-[11px] font-extrabold rounded-lg text-slate-400 hover:text-white transition";
-            }
-        }
-
-        function triggerAnalyze(type) {
-            if (isCooldown) return;
-            let randomRoll = Math.floor(Math.random() * 100);
-
-            if (type === 'tai-xiu') {
-                let pXi = randomRoll > 40 ? (Math.floor(Math.random() * 32) + 50) : (Math.floor(Math.random() * 25) + 18);
-                let pTa = 100 - pXi;
-
-                document.getElementById('tai-percent').innerText = pTa + '%';
-                document.getElementById('xiu-percent').innerText = pXi + '%';
-                document.getElementById('tai-xiu-result').innerHTML = pTa >= pXi 
-                    ? `<span class="text-cyan-400 font-bold">🔵 TÀI (${pTa}%) - Thuận Cầu</span>` 
-                    : `<span class="text-rose-400 font-bold">🔴 XỈU (${pXi}%) - Săn Cầu Đảo</span>`;
-
-                const gridTx = document.getElementById('history-grid-tx');
-                gridTx.innerHTML = '';
-                for (let i = 0; i < 16; i++) {
-                    let val = Math.floor(Math.random() * 14) + 3;
-                    let isTai = val >= 11;
-                    const cell = document.createElement('div');
-                    cell.className = `w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black border shadow ${
-                        isTai ? 'bg-slate-800 text-cyan-300 border-cyan-500/50' : 'bg-slate-800 text-rose-300 border-rose-500/50'
-                    }`;
-                    cell.innerText = val;
-                    gridTx.appendChild(cell);
-                }
-            } else {
-                let pLe = Math.floor(Math.random() * 40) + 40;
-                let pChan = 100 - pLe;
-
-                document.getElementById('chan-percent').innerText = pChan + '%';
-                document.getElementById('le-percent').innerText = pLe + '%';
-                document.getElementById('xoc-dia-result').innerHTML = pChan >= pLe 
-                    ? `<span class="text-amber-400 font-bold">⚪ CHẴN (${pChan}%)</span>` 
-                    : `<span class="text-purple-400 font-bold">⚫ LẺ (${pLe}%)</span>`;
-
-                const gridXd = document.getElementById('history-grid-xd');
-                gridXd.innerHTML = '';
-                for (let i = 0; i < 16; i++) {
-                    let val = Math.floor(Math.random() * 4);
-                    let isChan = val % 2 === 0;
-                    const cell = document.createElement('div');
-                    cell.className = `w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black border shadow ${
-                        isChan ? 'bg-slate-800 text-amber-300 border-amber-500/50' : 'bg-slate-800 text-purple-300 border-purple-500/50'
-                    }`;
-                    cell.innerText = isChan ? 'C' : 'L';
-                    gridXd.appendChild(cell);
-                }
-            }
-            startCooldown();
-        }
-
-        function startCooldown() {
-            isCooldown = true;
-            let timeLeft = 10;
-            const btnTX = document.getElementById('analyze-btn-tx');
-            const btnXD = document.getElementById('analyze-btn-xd');
-            btnTX.disabled = true; btnXD.disabled = true;
-
-            const timer = setInterval(() => {
-                btnTX.innerText = `AI Đang Xử Lý (${timeLeft}s)`;
-                btnXD.innerText = `AI Đang Xử Lý (${timeLeft}s)`;
-                timeLeft--;
-
-                if (timeLeft < 0) {
-                    clearInterval(timer);
-                    isCooldown = false;
-                    btnTX.disabled = false; btnTX.innerText = "⚡ Quét Thuật Toán AI Tài Xỉu";
-                    btnXD.disabled = false; btnXD.innerText = "⚡ Quét Thuật Toán Xóc Đĩa";
-                }
-            }, 1000);
-        }
-
-        function sendChatMessage() {
-            let input = document.getElementById('chat-input');
-            let message = input.value.trim();
-            if (!message) return;
-
-            let chatBox = document.getElementById('chat-messages');
-            let p = document.createElement('p');
-            p.className = "text-slate-300";
-            p.innerHTML = `<strong class="text-amber-400">${currentUser}:</strong> ${escapeHtml(message)}`;
-            chatBox.appendChild(p);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            input.value = '';
-        }
-
-        function handleChatKeyPress(e) {
-            if (e.key === 'Enter') sendChatMessage();
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        // Kéo di chuyển cửa sổ (Drag & Drop)
-        const header = document.getElementById('acc-header');
-        let isDragging = false, startX, startY, initialX, initialY;
-
-        header.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX; startY = e.clientY;
-            initialX = widget.offsetLeft; initialY = widget.offsetTop;
-            e.preventDefault();
+    // Lắng nghe Khung Chat Realtime từ mọi người dùng
+    db.ref('chats').limitToLast(20).on('value', snapshot => {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = '<div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>';
+        snapshot.forEach(child => {
+            const msg = child.val();
+            chatBox.innerHTML += `<div class="chat-msg"><b style="color:#00bcd4;">${msg.user}:</b> ${msg.text}</div>`;
         });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            widget.style.left = `${initialX + (e.clientX - startX)}px`;
-            widget.style.top = `${initialY + (e.clientY - startY)}px`;
+    // Gửi tin nhắn Chat lên Server
+    function sendChatMessage() {
+        const inp = document.getElementById('chat-input');
+        const txt = inp.value.trim();
+        if (!txt) return;
+        const u = loggedUser || 'Khách_' + Math.floor(Math.random() * 1000);
+        db.ref('chats').push({
+            user: u,
+            text: txt,
+            time: Date.now()
         });
+        inp.value = '';
+    }
+</script>
 
-        document.addEventListener('mouseup', () => { isDragging = false; });
-
-        calculateAICurrency();
-    </script>
 </body>
 </html>
