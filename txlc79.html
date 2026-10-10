@@ -91,11 +91,11 @@
             <span>●</span> LC79 ALL-IN-ONE <span class="timer">(58:08)</span>
         </div>
         <div class="nav-btns">
-            <button class="btn btn-cyan" onclick="openAuthModal('login')">Đăng Nhập</button>
-            <button class="btn btn-gold" onclick="openAuthModal('register')">Đăng Ký</button>
+            <button class="btn btn-cyan" id="btn-login">Đăng Nhập</button>
+            <button class="btn btn-gold" id="btn-register">Đăng Ký</button>
             <button class="btn btn-green">💸 Nạp</button>
             <button class="btn btn-orange">Mua Giờ</button>
-            <button class="btn btn-purple" onclick="openAdminPanel()">Admin</button>
+            <button class="btn btn-purple" id="btn-admin">Admin</button>
         </div>
     </div>
 
@@ -118,7 +118,7 @@
     <div class="grid-container">
         <!-- Panel Trái: Soi Cầu AI -->
         <div class="panel">
-            <div class="drop-zone" onclick="alert('Tính năng quét ảnh soi cầu đang sẵn sàng!')">
+            <div class="drop-zone" id="drop-zone-click">
                 📁 <b>Chọn file ảnh cầu soi</b><br>
                 <span style="font-size: 11px; color: #577390;">Click & dán ảnh</span>
             </div>
@@ -143,7 +143,7 @@
             <div style="font-size: 11px; color: #8ba2bd; text-align: center; margin-bottom: 12px;">
                 Nhận định AI: <span style="color: #00c853; font-weight: bold;">Sẵn sàng phân tích</span>
             </div>
-            <button class="btn-main-ai" onclick="runAIScan()">⚡ Quét Thuật Toán AI Tài Xỉu</button>
+            <button class="btn-main-ai" id="btn-ai-scan">⚡ Quét Thuật Toán AI Tài Xỉu</button>
         </div>
 
         <!-- Panel Phải: Cược & Chat VIP -->
@@ -159,8 +159,8 @@
             </div>
 
             <div class="bet-btns">
-                <button class="btn-bet btn-win" onclick="alert('Đã ghi nhận cược THẮNG!')">✔ Thắng</button>
-                <button class="btn-bet btn-lose" onclick="alert('Đã ghi nhận cược THUA!')">✖ Thua</button>
+                <button class="btn-bet btn-win" id="btn-win">✔ Thắng</button>
+                <button class="btn-bet btn-lose" id="btn-lose">✖ Thua</button>
             </div>
 
             <div style="font-size: 12px; color: #8ba2bd; margin-bottom: 6px;">💬 KHUNG CHAT VIP <span style="color: #00c853;">• ONLINE SERVER</span></div>
@@ -169,7 +169,7 @@
             </div>
             <div class="chat-input-wrap">
                 <input type="text" class="chat-input" id="chat-input" placeholder="Nhập nội dung...">
-                <button class="btn-send" onclick="sendChatMessage()">Gửi</button>
+                <button class="btn-send" id="btn-send-chat">Gửi</button>
             </div>
 
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: #577390; margin-top: 15px;">
@@ -183,7 +183,7 @@
 <!-- Modal Đăng Nhập / Đăng Ký -->
 <div class="modal" id="auth-modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeModal('auth-modal')">&times;</span>
+        <span class="close-btn" id="close-auth">&times;</span>
         <h3 id="modal-title" style="margin-bottom: 15px; color: #00ffaa; text-align: center;">Đăng Nhập</h3>
         <div class="input-group">
             <label>Tên tài khoản:</label>
@@ -193,7 +193,7 @@
             <label>Mật khẩu:</label>
             <input type="password" id="auth-password" class="input-control" placeholder="Nhập mật khẩu...">
         </div>
-        <button class="btn-main-ai" onclick="submitAuth()" style="margin-top: 10px;">Xác Nhận</button>
+        <button class="btn-main-ai" id="btn-submit-auth" style="margin-top: 10px;">Xác Nhận</button>
         <div id="auth-msg" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
     </div>
 </div>
@@ -201,7 +201,7 @@
 <!-- Modal Admin Dashboard (Toàn Server) -->
 <div class="modal" id="admin-modal">
     <div class="modal-content" style="max-width: 650px;">
-        <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
+        <span class="close-btn" id="close-admin">&times;</span>
         <h3 style="color: #ff1744; text-align: center; margin-bottom: 10px;">👑 Quản Trị Server (Realtime)</h3>
         <p style="font-size: 12px; color: #8ba2bd; text-align: center; margin-bottom: 15px;">Danh sách tất cả tài khoản đăng ký từ máy tính & điện thoại khác nhau</p>
         <div style="max-height: 300px; overflow-y: auto;">
@@ -222,186 +222,194 @@
     </div>
 </div>
 
-<!-- Cấu hình Firebase Server Trực Tiếp Chạy Luôn (Không Lỗi) -->
+<!-- Script tương tác hoàn chỉnh -->
 <script>
-    // Database Server Cloud dùng chung đã cấu hình sẵn hoạt động ngay lập tức
-    const firebaseConfig = {
-        databaseURL: "https://lc79top-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
+    document.addEventListener("DOMContentLoaded", function() {
+        const firebaseConfig = {
+            databaseURL: "https://lc79top-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
 
-    // Khởi tạo kết nối Realtime
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
 
-    let currentAuthMode = 'login';
-    let loggedUser = localStorage.getItem('lc79_logged_user') || null;
+        let currentAuthMode = 'login';
+        let loggedUser = localStorage.getItem('lc79_logged_user') || null;
 
-    if (loggedUser) {
-        document.getElementById('disp-username').innerText = loggedUser;
-    }
-
-    // Mã định danh thiết bị độc lập (Device ID)
-    let deviceId = localStorage.getItem('lc79_device_id');
-    if (!deviceId) {
-        deviceId = 'device_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
-        localStorage.setItem('lc79_device_id', deviceId);
-    }
-
-    function openAuthModal(mode) {
-        currentAuthMode = mode;
-        document.getElementById('modal-title').innerText = mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký (Tối đa 2 TK/thiết bị)';
-        document.getElementById('auth-msg').innerText = '';
-        document.getElementById('auth-modal').style.display = 'flex';
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-
-    // Xử lý Đăng ký / Đăng nhập trực tuyến Server
-    function submitAuth() {
-        const u = document.getElementById('auth-username').value.trim();
-        const p = document.getElementById('auth-password').value.trim();
-        const msg = document.getElementById('auth-msg');
-
-        if (!u || !p) {
-            msg.style.color = '#ff1744';
-            msg.innerText = 'Vui lòng nhập đầy đủ tài khoản & mật khẩu!';
-            return;
+        if (loggedUser) {
+            document.getElementById('disp-username').innerText = loggedUser;
         }
 
-        const usersRef = db.ref('users');
-
-        if (currentAuthMode === 'register') {
-            // Kiểm tra giới hạn 2 tài khoản trên cùng thiết bị này
-            usersRef.orderByChild('deviceId').equalTo(deviceId).once('value', snapshot => {
-                let devCount = 0;
-                snapshot.forEach(() => devCount++);
-
-                if (devCount >= 2) {
-                    msg.style.color = '#ff1744';
-                    msg.innerText = '❌ Thiết bị này đã đạt giới hạn tối đa (2 tài khoản)!';
-                    return;
-                }
-
-                // Kiểm tra trùng tên tài khoản trên Server
-                usersRef.orderByChild('username').equalTo(u).once('value', userSnap => {
-                    if (userSnap.exists()) {
-                        msg.style.color = '#ff1744';
-                        msg.innerText = '❌ Tên tài khoản này đã có người đăng ký!';
-                    } else {
-                        // Tạo tài khoản mới lên Server
-                        usersRef.push({
-                            username: u,
-                            password: p,
-                            deviceId: deviceId,
-                            createdAt: new Date().toLocaleString()
-                        }).then(() => {
-                            msg.style.color = '#00c853';
-                            msg.innerText = '✔ Đăng ký thành công!';
-                            loggedUser = u;
-                            localStorage.setItem('lc79_logged_user', u);
-                            document.getElementById('disp-username').innerText = u;
-                            setTimeout(() => closeModal('auth-modal'), 800);
-                        });
-                    }
-                });
-            });
-        } else {
-            // Xử lý Đăng nhập
-            usersRef.orderByChild('username').equalTo(u).once('value', snapshot => {
-                if (!snapshot.exists()) {
-                    msg.style.color = '#ff1744';
-                    msg.innerText = '❌ Tài khoản không tồn tại trên hệ thống!';
-                    return;
-                }
-                let isValid = false;
-                snapshot.forEach(child => {
-                    if (child.val().password === p) {
-                        isValid = true;
-                    }
-                });
-
-                if (isValid) {
-                    msg.style.color = '#00c853';
-                    msg.innerText = '✔ Đăng nhập thành công!';
-                    loggedUser = u;
-                    localStorage.setItem('lc79_logged_user', u);
-                    document.getElementById('disp-username').innerText = u;
-                    setTimeout(() => closeModal('auth-modal'), 800);
-                } else {
-                    msg.style.color = '#ff1744';
-                    msg.innerText = '❌ Sai mật khẩu!';
-                }
-            });
-        }
-    }
-
-    // Mở Bảng Quản Trị Admin Server
-    function openAdminPanel() {
-        if (!loggedUser || loggedUser.toLowerCase() !== 'admin') {
-            alert('🔒 Bạn phải Đăng nhập tài khoản "admin" để mở Bảng Quản Trị Server!');
-            openAuthModal('login');
-            return;
+        let deviceId = localStorage.getItem('lc79_device_id');
+        if (!deviceId) {
+            deviceId = 'device_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+            localStorage.setItem('lc79_device_id', deviceId);
         }
 
-        document.getElementById('admin-modal').style.display = 'flex';
-        // Lấy dữ liệu Realtime toàn server
-        db.ref('users').on('value', snapshot => {
-            const tbody = document.getElementById('admin-user-list');
-            tbody.innerHTML = '';
-            snapshot.forEach(child => {
-                const data = child.val();
-                tbody.innerHTML += `<tr>
-                    <td style="color:#00ffaa; font-weight:bold;">${data.username}</td>
-                    <td>${data.password}</td>
-                    <td style="font-size:10px; color:#8ba2bd;">${data.deviceId}</td>
-                    <td>${data.createdAt}</td>
-                </tr>`;
-            });
-        });
-    }
-
-    // Chạy giả lập Quét AI Soi Cầu
-    function runAIScan() {
-        const status = document.getElementById('ai-status');
-        const tai = document.getElementById('val-tai');
-        const xiu = document.getElementById('val-xiu');
+        document.getElementById('btn-login').addEventListener('click', () => openAuthModal('login'));
+        document.getElementById('btn-register').addEventListener('click', () => openAuthModal('register'));
+        document.getElementById('btn-admin').addEventListener('click', openAdminPanel);
         
-        status.innerText = '🔄 Đang phân tích thuật toán AI...';
-        setTimeout(() => {
-            let t = Math.floor(Math.random() * 40) + 30;
-            let x = 100 - t;
-            tai.innerText = t + '%';
-            xiu.innerText = x + '%';
-            status.innerText = t > x ? '✅ AI Dự Báo: Báo TÀI' : '✅ AI Dự Báo: Báo XỈU';
-        }, 1200);
-    }
+        document.getElementById('close-auth').addEventListener('click', () => closeModal('auth-modal'));
+        document.getElementById('close-admin').addEventListener('click', () => closeModal('admin-modal'));
+        document.getElementById('btn-submit-auth').addEventListener('click', submitAuth);
+        
+        document.getElementById('btn-ai-scan').addEventListener('click', runAIScan);
+        document.getElementById('btn-send-chat').addEventListener('click', sendChatMessage);
+        
+        document.getElementById('btn-win').addEventListener('click', () => alert('Đã ghi nhận cược THẮNG!'));
+        document.getElementById('btn-lose').addEventListener('click', () => alert('Đã ghi nhận cược THUA!'));
+        document.getElementById('drop-zone-click').addEventListener('click', () => alert('Tính năng quét ảnh cầu soi đang sẵn sàng!'));
 
-    // Lắng nghe Khung Chat Realtime từ mọi người dùng
-    db.ref('chats').limitToLast(20).on('value', snapshot => {
-        const chatBox = document.getElementById('chat-box');
-        chatBox.innerHTML = '<div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>';
-        snapshot.forEach(child => {
-            const msg = child.val();
-            chatBox.innerHTML += `<div class="chat-msg"><b style="color:#00bcd4;">${msg.user}:</b> ${msg.text}</div>`;
+        function openAuthModal(mode) {
+            currentAuthMode = mode;
+            document.getElementById('modal-title').innerText = mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký (Tối đa 2 TK/thiết bị)';
+            document.getElementById('auth-msg').innerText = '';
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function submitAuth() {
+            const u = document.getElementById('auth-username').value.trim();
+            const p = document.getElementById('auth-password').value.trim();
+            const msg = document.getElementById('auth-msg');
+
+            if (!u || !p) {
+                msg.style.color = '#ff1744';
+                msg.innerText = 'Vui lòng nhập đầy đủ tài khoản & mật khẩu!';
+                return;
+            }
+
+            const usersRef = db.ref('users');
+
+            if (currentAuthMode === 'register') {
+                usersRef.orderByChild('deviceId').equalTo(deviceId).once('value', snapshot => {
+                    let devCount = 0;
+                    snapshot.forEach(() => devCount++);
+
+                    if (devCount >= 2) {
+                        msg.style.color = '#ff1744';
+                        msg.innerText = '❌ Thiết bị này đã đạt giới hạn tối đa (2 tài khoản)!';
+                        return;
+                    }
+
+                    usersRef.orderByChild('username').equalTo(u).once('value', userSnap => {
+                        if (userSnap.exists()) {
+                            msg.style.color = '#ff1744';
+                            msg.innerText = '❌ Tên tài khoản này đã có người đăng ký!';
+                        } else {
+                            usersRef.push({
+                                username: u,
+                                password: p,
+                                deviceId: deviceId,
+                                createdAt: new Date().toLocaleString()
+                            }).then(() => {
+                                msg.style.color = '#00c853';
+                                msg.innerText = '✔ Đăng ký thành công!';
+                                loggedUser = u;
+                                localStorage.setItem('lc79_logged_user', u);
+                                document.getElementById('disp-username').innerText = u;
+                                setTimeout(() => closeModal('auth-modal'), 800);
+                            });
+                        }
+                    });
+                });
+            } else {
+                usersRef.orderByChild('username').equalTo(u).once('value', snapshot => {
+                    if (!snapshot.exists()) {
+                        msg.style.color = '#ff1744';
+                        msg.innerText = '❌ Tài khoản không tồn tại trên hệ thống!';
+                        return;
+                    }
+                    let isValid = false;
+                    snapshot.forEach(child => {
+                        if (child.val().password === p) {
+                            isValid = true;
+                        }
+                    });
+
+                    if (isValid) {
+                        msg.style.color = '#00c853';
+                        msg.innerText = '✔ Đăng nhập thành công!';
+                        loggedUser = u;
+                        localStorage.setItem('lc79_logged_user', u);
+                        document.getElementById('disp-username').innerText = u;
+                        setTimeout(() => closeModal('auth-modal'), 800);
+                    } else {
+                        msg.style.color = '#ff1744';
+                        msg.innerText = '❌ Sai mật khẩu!';
+                    }
+                });
+            }
+        }
+
+        function openAdminPanel() {
+            if (!loggedUser || loggedUser.toLowerCase() !== 'admin') {
+                alert('🔒 Bạn phải Đăng nhập tài khoản có tên "admin" để mở Bảng Quản Trị Server!');
+                openAuthModal('login');
+                return;
+            }
+
+            document.getElementById('admin-modal').style.display = 'flex';
+            db.ref('users').on('value', snapshot => {
+                const tbody = document.getElementById('admin-user-list');
+                tbody.innerHTML = '';
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    tbody.innerHTML += `<tr>
+                        <td style="color:#00ffaa; font-weight:bold;">${data.username}</td>
+                        <td>${data.password}</td>
+                        <td style="font-size:10px; color:#8ba2bd;">${data.deviceId}</td>
+                        <td>${data.createdAt}</td>
+                    </tr>`;
+                });
+            });
+        }
+
+        function runAIScan() {
+            const status = document.getElementById('ai-status');
+            const tai = document.getElementById('val-tai');
+            const xiu = document.getElementById('val-xiu');
+            
+            status.innerText = '🔄 Đang phân tích thuật toán AI...';
+            setTimeout(() => {
+                let t = Math.floor(Math.random() * 40) + 30;
+                let x = 100 - t;
+                tai.innerText = t + '%';
+                xiu.innerText = x + '%';
+                status.innerText = t > x ? '✅ AI Dự Báo: Báo TÀI' : '✅ AI Dự Báo: Báo XỈU';
+            }, 1200);
+        }
+
+        db.ref('chats').limitToLast(20).on('value', snapshot => {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '<div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>';
+            snapshot.forEach(child => {
+                const msg = child.val();
+                chatBox.innerHTML += `<div class="chat-msg"><b style="color:#00bcd4;">${msg.user}:</b> ${msg.text}</div>`;
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
-        chatBox.scrollTop = chatBox.scrollHeight;
+
+        function sendChatMessage() {
+            const inp = document.getElementById('chat-input');
+            const txt = inp.value.trim();
+            if (!txt) return;
+            const u = loggedUser || 'Khách_' + Math.floor(Math.random() * 1000);
+            db.ref('chats').push({
+                user: u,
+                text: txt,
+                time: Date.now()
+            });
+            inp.value = '';
+        }
     });
-
-    // Gửi tin nhắn Chat lên Server
-    function sendChatMessage() {
-        const inp = document.getElementById('chat-input');
-        const txt = inp.value.trim();
-        if (!txt) return;
-        const u = loggedUser || 'Khách_' + Math.floor(Math.random() * 1000);
-        db.ref('chats').push({
-            user: u,
-            text: txt,
-            time: Date.now()
-        });
-        inp.value = '';
-    }
 </script>
 
 </body>
