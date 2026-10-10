@@ -3,413 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LC79 ALL-IN-ONE</title>
-    <!-- Thư viện Firebase SDK Compat -->
+    <title>LC79 CLUB - Hệ Thống Quản Lý</title>
+    <!-- Thêm thư viện Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0b1118; color: #fff; padding: 15px; display: flex; justify-content: center; }
-        .main-card { background: #121d28; border: 1px solid #1e3144; border-radius: 12px; width: 100%; max-width: 900px; padding: 15px; box-shadow: 0 0 20px rgba(0, 255, 170, 0.1); }
-        
-        /* Header Bar */
-        .header { display: flex; justify-content: space-between; align-items: center; background: #182635; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .logo { font-weight: bold; color: #00ffaa; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-        .timer { color: #ffcc00; font-size: 13px; }
-        .nav-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-        .btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s; }
-        .btn-cyan { background: #00bcd4; color: #000; }
-        .btn-gold { background: #ffb300; color: #000; }
-        .btn-green { background: #00c853; color: #fff; }
-        .btn-orange { background: #ff6d00; color: #fff; }
-        .btn-purple { background: #6200ea; color: #fff; }
-        .btn:hover { opacity: 0.85; }
-
-        /* User Info Bar */
-        .user-bar { display: flex; justify-content: space-between; background: #152230; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 32px; height: 32px; background: #26384c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .balance { text-align: right; }
-        .balance-val { color: #ffcc00; font-weight: bold; font-size: 15px; }
-
-        /* Main Grid Layout */
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
-
-        .panel { background: #182635; padding: 15px; border-radius: 8px; border: 1px solid #223548; }
-        
-        /* Soi cầu section */
-        .drop-zone { border: 2px dashed #2a415a; border-radius: 8px; padding: 20px; text-align: center; color: #8ba2bd; cursor: pointer; margin-bottom: 15px; font-size: 13px; }
-        .mode-selector { display: flex; margin-bottom: 15px; background: #0d1620; border-radius: 6px; overflow: hidden; }
-        .mode-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-weight: bold; color: #8ba2bd; font-size: 13px; }
-        .mode-btn.active { background: #00c853; color: #fff; }
-
-        .result-box { display: flex; justify-content: space-around; background: #0d1620; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .res-item { flex: 1; }
-        .res-title { font-size: 12px; color: #8ba2bd; margin-bottom: 5px; }
-        .res-val { font-weight: bold; font-size: 18px; }
-
-        .status-box { background: #0d1620; padding: 10px; text-align: center; border-radius: 6px; color: #8ba2bd; margin-bottom: 12px; font-size: 13px; }
-        .btn-main-ai { width: 100%; padding: 12px; background: #00c853; color: #fff; font-weight: bold; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; }
-
-        /* Right Panel: Betting & Chat */
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 12px; color: #8ba2bd; margin-bottom: 5px; }
-        .input-control { width: 100%; padding: 9px; background: #0d1620; border: 1px solid #223548; border-radius: 6px; color: #fff; font-weight: bold; }
-
-        .ai-recommend { background: #0d1620; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .ai-rec-val { background: #00c853; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-
-        .bet-btns { display: flex; gap: 10px; margin-bottom: 12px; }
-        .btn-bet { flex: 1; padding: 9px; border: none; border-radius: 6px; font-weight: bold; color: #fff; cursor: pointer; font-size: 13px; }
-        .btn-win { background: #00c853; }
-        .btn-lose { background: #d50000; }
-
-        /* Chat Box */
-        .chat-box { background: #0d1620; border-radius: 6px; padding: 10px; height: 140px; overflow-y: auto; font-size: 12px; margin-bottom: 10px; }
-        .chat-msg { margin-bottom: 6px; }
-        .chat-msg .sys { color: #00c853; font-weight: bold; }
-        .chat-input-wrap { display: flex; gap: 8px; }
-        .chat-input { flex: 1; padding: 8px 12px; background: #0d1620; border: 1px solid #223548; border-radius: 20px; color: #fff; font-size: 12px; }
-        .btn-send { background: #3d5aff; color: #fff; padding: 8px 15px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; }
-
-        /* Modal Auth / Admin */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 999; }
-        .modal-content { background: #182635; padding: 20px; border-radius: 12px; width: 90%; max-width: 450px; border: 1px solid #223548; position: relative; }
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: #8ba2bd; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
-        .admin-table th, .admin-table td { border: 1px solid #223548; padding: 8px; text-align: left; word-break: break-all; }
-        .admin-table th { background: #0d1620; color: #00ffaa; }
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #218838; }
+        .admin-panel { margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px; display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #007bff; color: white; }
+        .error { color: red; font-size: 14px; margin-top: 5px; text-align: center; }
+        .success { color: green; font-size: 14px; margin-top: 5px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            <span>●</span> LC79 ALL-IN-ONE <span class="timer">(58:08)</span>
-        </div>
-        <div class="nav-btns">
-            <button class="btn btn-cyan" id="btn-login">Đăng Nhập</button>
-            <button class="btn btn-gold" id="btn-register">Đăng Ký</button>
-            <button class="btn btn-green">💸 Nạp</button>
-            <button class="btn btn-orange">Mua Giờ</button>
-            <button class="btn btn-purple" id="btn-admin">Admin</button>
-        </div>
-    </div>
-
-    <!-- User Info Bar -->
-    <div class="user-bar">
-        <div class="user-info">
-            <div class="avatar">👤</div>
-            <div>
-                <div style="font-size: 11px; color: #8ba2bd;">TÀI KHOẢN</div>
-                <div style="font-weight: bold; color: #00c853;" id="disp-username">Chưa đăng nhập</div>
-            </div>
-        </div>
-        <div class="balance">
-            <div style="font-size: 11px; color: #8ba2bd;">SỐ DƯ VÍ (NẠP ↗)</div>
-            <div class="balance-val">5.000 VNĐ</div>
-        </div>
-    </div>
-
-    <!-- Main Grid Content -->
-    <div class="grid-container">
-        <!-- Panel Trái: Soi Cầu AI -->
-        <div class="panel">
-            <div class="drop-zone" id="drop-zone-click">
-                📁 <b>Chọn file ảnh cầu soi</b><br>
-                <span style="font-size: 11px; color: #577390;">Click & dán ảnh</span>
-            </div>
-
-            <div class="mode-selector">
-                <div class="mode-btn active">Tài Xỉu VIP</div>
-                <div class="mode-btn">Xóc Đĩa VIP</div>
-            </div>
-
-            <div class="result-box">
-                <div class="res-item">
-                    <div class="res-title">🔵 TÀI</div>
-                    <div class="res-val" id="val-tai" style="color: #00bcd4;">-- %</div>
-                </div>
-                <div class="res-item">
-                    <div class="res-title">🔴 XỈU</div>
-                    <div class="res-val" id="val-xiu" style="color: #ff1744;">-- %</div>
-                </div>
-            </div>
-
-            <div class="status-box" id="ai-status">Đang chờ quét cầu...</div>
-            <div style="font-size: 11px; color: #8ba2bd; text-align: center; margin-bottom: 12px;">
-                Nhận định AI: <span style="color: #00c853; font-weight: bold;">Sẵn sàng phân tích</span>
-            </div>
-            <button class="btn-main-ai" id="btn-ai-scan">⚡ Quét Thuật Toán AI Tài Xỉu</button>
-        </div>
-
-        <!-- Panel Phải: Cược & Chat VIP -->
-        <div class="panel">
-            <div class="input-group">
-                <label>Số vốn hiện có (VNĐ):</label>
-                <input type="text" class="input-control" value="5000">
-            </div>
-
-            <div class="ai-recommend">
-                <span style="font-size: 12px; color: #8ba2bd;">🤖 AI Khuyên Cược:</span>
-                <span class="ai-rec-val">50 VNĐ (1%)</span>
-            </div>
-
-            <div class="bet-btns">
-                <button class="btn-bet btn-win" id="btn-win">✔ Thắng</button>
-                <button class="btn-bet btn-lose" id="btn-lose">✖ Thua</button>
-            </div>
-
-            <div style="font-size: 12px; color: #8ba2bd; margin-bottom: 6px;">💬 KHUNG CHAT VIP <span style="color: #00c853;">• ONLINE SERVER</span></div>
-            <div class="chat-box" id="chat-box">
-                <div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>
-            </div>
-            <div class="chat-input-wrap">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Nhập nội dung...">
-                <button class="btn-send" id="btn-send-chat">Gửi</button>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #577390; margin-top: 15px;">
-                <span>Hỗ trợ: <b style="color: #00bcd4;">@Ngocvotool</b></span>
-                <span style="color: #00c853; cursor: pointer;">Nạp Tiền Nhanh ↗</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Đăng Nhập / Đăng Ký -->
-<div class="modal" id="auth-modal">
-    <div class="modal-content">
-        <span class="close-btn" id="close-auth">&times;</span>
-        <h3 id="modal-title" style="margin-bottom: 15px; color: #00ffaa; text-align: center;">Đăng Nhập</h3>
-        <div class="input-group">
+<div class="container">
+    <h2>LC79 CLUB - Đăng Ký / Đăng Nhập</h2>
+    
+    <div id="auth-section">
+        <div class="form-group">
             <label>Tên tài khoản:</label>
-            <input type="text" id="auth-username" class="input-control" placeholder="Nhập tài khoản...">
+            <input type="text" id="username" placeholder="Nhập tên tài khoản...">
         </div>
-        <div class="input-group">
+        <div class="form-group">
             <label>Mật khẩu:</label>
-            <input type="password" id="auth-password" class="input-control" placeholder="Nhập mật khẩu...">
+            <input type="password" id="password" placeholder="Nhập mật khẩu...">
         </div>
-        <button class="btn-main-ai" id="btn-submit-auth" style="margin-top: 10px;">Xác Nhận</button>
-        <div id="auth-msg" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
+        <button onclick="handleLoginOrRegister()">Đăng Nhập / Đăng Ký</button>
+        <div id="message"></div>
+    </div>
+
+    <!-- KHU VỰC ADMIN (Hiển thị toàn bộ server) -->
+    <div id="admin-section" class="admin-panel">
+        <h3 style="color: #dc3545; text-align: center;">👑 Bảng Quản Trị Admin (Toàn Server)</h3>
+        <p>Danh sách tất cả tài khoản đã đăng ký trên mọi thiết bị:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tài khoản</th>
+                    <th>Thiết bị (ID)</th>
+                    <th>Thời gian tạo</th>
+                </tr>
+            </thead>
+            <tbody id="user-list-table">
+                <!-- Dữ liệu realtime từ server sẽ đổ vào đây -->
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Modal Admin Dashboard (Toàn Server) -->
-<div class="modal" id="admin-modal">
-    <div class="modal-content" style="max-width: 650px;">
-        <span class="close-btn" id="close-admin">&times;</span>
-        <h3 style="color: #ff1744; text-align: center; margin-bottom: 10px;">👑 Quản Trị Server (Realtime)</h3>
-        <p style="font-size: 12px; color: #8ba2bd; text-align: center; margin-bottom: 15px;">Danh sách tất cả tài khoản đăng ký từ máy tính & điện thoại khác nhau</p>
-        <div style="max-height: 300px; overflow-y: auto;">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Tài Khoản</th>
-                        <th>Mật Khẩu</th>
-                        <th>Mã Thiết Bị (Device ID)</th>
-                        <th>Ngày Tạo</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-user-list">
-                    <!-- Dữ liệu từ Server -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Script tương tác hoàn chỉnh -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const firebaseConfig = {
-            databaseURL: "https://lc79top-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
+    // --- CẤU HÌNH FIREBASE CỦA BẠN ---
+    // (Hãy thay thông tin dự án Firebase miễn phí của bạn vào đây)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
+    // Khởi tạo Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        let currentAuthMode = 'login';
-        let loggedUser = localStorage.getItem('lc79_logged_user') || null;
+    // Tạo mã định danh duy nhất cho thiết bị hiện tại (Device Fingerprint / Local ID)
+    let deviceId = localStorage.getItem('lc79_device_id');
+    if (!deviceId) {
+        deviceId = 'device_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('lc79_device_id', deviceId);
+    }
 
-        if (loggedUser) {
-            document.getElementById('disp-username').innerText = loggedUser;
-        }
+    // Hàm xử lý Đăng nhập / Đăng ký kèm kiểm tra giới hạn 2 tài khoản/thiết bị
+    function handleLoginOrRegister() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const msgDiv = document.getElementById('message');
 
-        let deviceId = localStorage.getItem('lc79_device_id');
-        if (!deviceId) {
-            deviceId = 'device_' + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
-            localStorage.setItem('lc79_device_id', deviceId);
-        }
-
-        document.getElementById('btn-login').addEventListener('click', () => openAuthModal('login'));
-        document.getElementById('btn-register').addEventListener('click', () => openAuthModal('register'));
-        document.getElementById('btn-admin').addEventListener('click', openAdminPanel);
-        
-        document.getElementById('close-auth').addEventListener('click', () => closeModal('auth-modal'));
-        document.getElementById('close-admin').addEventListener('click', () => closeModal('admin-modal'));
-        document.getElementById('btn-submit-auth').addEventListener('click', submitAuth);
-        
-        document.getElementById('btn-ai-scan').addEventListener('click', runAIScan);
-        document.getElementById('btn-send-chat').addEventListener('click', sendChatMessage);
-        
-        document.getElementById('btn-win').addEventListener('click', () => alert('Đã ghi nhận cược THẮNG!'));
-        document.getElementById('btn-lose').addEventListener('click', () => alert('Đã ghi nhận cược THUA!'));
-        document.getElementById('drop-zone-click').addEventListener('click', () => alert('Tính năng quét ảnh cầu soi đang sẵn sàng!'));
-
-        function openAuthModal(mode) {
-            currentAuthMode = mode;
-            document.getElementById('modal-title').innerText = mode === 'login' ? 'Đăng Nhập' : 'Đăng Ký (Tối đa 2 TK/thiết bị)';
-            document.getElementById('auth-msg').innerText = '';
-            document.getElementById('auth-username').value = '';
-            document.getElementById('auth-password').value = '';
-            document.getElementById('auth-modal').style.display = 'flex';
+        if (!username || !password) {
+            msgDiv.className = "error";
+            msgDiv.innerText = "Vui lòng nhập đầy đủ tài khoản và mật khẩu!";
+            return;
         }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
+        const usersRef = db.ref('users');
 
-        function submitAuth() {
-            const u = document.getElementById('auth-username').value.trim();
-            const p = document.getElementById('auth-password').value.trim();
-            const msg = document.getElementById('auth-msg');
+        // Kiểm tra xem thiết bị này đã tạo bao nhiêu tài khoản trước đó
+        usersRef.orderByChild('deviceId').equalTo(deviceId).once('value', (snapshot) => {
+            let deviceAccountCount = 0;
+            let existingUser = false;
 
-            if (!u || !p) {
-                msg.style.color = '#ff1744';
-                msg.innerText = 'Vui lòng nhập đầy đủ tài khoản & mật khẩu!';
+            snapshot.forEach((childSnapshot) => {
+                const userData = childSnapshot.val();
+                deviceAccountCount++;
+                if (userData.username === username) {
+                    existingUser = true;
+                }
+            });
+
+            // Nếu tài khoản đã tồn tại -> Cho phép đăng nhập
+            if (existingUser) {
+                msgDiv.className = "success";
+                msgDiv.innerText = "Đăng nhập thành công!";
+                checkAdminAccess(username);
                 return;
             }
 
-            const usersRef = db.ref('users');
-
-            if (currentAuthMode === 'register') {
-                usersRef.orderByChild('deviceId').equalTo(deviceId).once('value', snapshot => {
-                    let devCount = 0;
-                    snapshot.forEach(() => devCount++);
-
-                    if (devCount >= 2) {
-                        msg.style.color = '#ff1744';
-                        msg.innerText = '❌ Thiết bị này đã đạt giới hạn tối đa (2 tài khoản)!';
-                        return;
-                    }
-
-                    usersRef.orderByChild('username').equalTo(u).once('value', userSnap => {
-                        if (userSnap.exists()) {
-                            msg.style.color = '#ff1744';
-                            msg.innerText = '❌ Tên tài khoản này đã có người đăng ký!';
-                        } else {
-                            usersRef.push({
-                                username: u,
-                                password: p,
-                                deviceId: deviceId,
-                                createdAt: new Date().toLocaleString()
-                            }).then(() => {
-                                msg.style.color = '#00c853';
-                                msg.innerText = '✔ Đăng ký thành công!';
-                                loggedUser = u;
-                                localStorage.setItem('lc79_logged_user', u);
-                                document.getElementById('disp-username').innerText = u;
-                                setTimeout(() => closeModal('auth-modal'), 800);
-                            });
-                        }
-                    });
-                });
-            } else {
-                usersRef.orderByChild('username').equalTo(u).once('value', snapshot => {
-                    if (!snapshot.exists()) {
-                        msg.style.color = '#ff1744';
-                        msg.innerText = '❌ Tài khoản không tồn tại trên hệ thống!';
-                        return;
-                    }
-                    let isValid = false;
-                    snapshot.forEach(child => {
-                        if (child.val().password === p) {
-                            isValid = true;
-                        }
-                    });
-
-                    if (isValid) {
-                        msg.style.color = '#00c853';
-                        msg.innerText = '✔ Đăng nhập thành công!';
-                        loggedUser = u;
-                        localStorage.setItem('lc79_logged_user', u);
-                        document.getElementById('disp-username').innerText = u;
-                        setTimeout(() => closeModal('auth-modal'), 800);
-                    } else {
-                        msg.style.color = '#ff1744';
-                        msg.innerText = '❌ Sai mật khẩu!';
-                    }
-                });
-            }
-        }
-
-        function openAdminPanel() {
-            if (!loggedUser || loggedUser.toLowerCase() !== 'admin') {
-                alert('🔒 Bạn phải Đăng nhập tài khoản có tên "admin" để mở Bảng Quản Trị Server!');
-                openAuthModal('login');
+            // Nếu tài khoản chưa tồn tại và thiết bị đã đạt giới hạn 2 tài khoản
+            if (deviceAccountCount >= 2) {
+                msgDiv.className = "error";
+                msgDiv.innerText = "❌ Thiết bị này đã đạt giới hạn tối đa (2 tài khoản). Không thể tạo thêm!";
                 return;
             }
 
-            document.getElementById('admin-modal').style.display = 'flex';
-            db.ref('users').on('value', snapshot => {
-                const tbody = document.getElementById('admin-user-list');
-                tbody.innerHTML = '';
-                snapshot.forEach(child => {
-                    const data = child.val();
-                    tbody.innerHTML += `<tr>
-                        <td style="color:#00ffaa; font-weight:bold;">${data.username}</td>
-                        <td>${data.password}</td>
-                        <td style="font-size:10px; color:#8ba2bd;">${data.deviceId}</td>
-                        <td>${data.createdAt}</td>
-                    </tr>`;
-                });
-            });
-        }
+            // Kiểm tra xem tên tài khoản đã bị người khác lấy chưa
+            usersRef.orderByChild('username').equalTo(username).once('value', (userSnap) => {
+                if (userSnap.exists()) {
+                    msgDiv.className = "error";
+                    msgDiv.innerText = "❌ Tên tài khoản này đã có người sử dụng!";
+                } else {
+                    // Tiến hành tạo tài khoản mới lên Server Realtime
+                    const newUserData = {
+                        username: username,
+                        password: password,
+                        deviceId: deviceId,
+                        createdAt: new Date().toLocaleString()
+                    };
 
-        function runAIScan() {
-            const status = document.getElementById('ai-status');
-            const tai = document.getElementById('val-tai');
-            const xiu = document.getElementById('val-xiu');
-            
-            status.innerText = '🔄 Đang phân tích thuật toán AI...';
-            setTimeout(() => {
-                let t = Math.floor(Math.random() * 40) + 30;
-                let x = 100 - t;
-                tai.innerText = t + '%';
-                xiu.innerText = x + '%';
-                status.innerText = t > x ? '✅ AI Dự Báo: Báo TÀI' : '✅ AI Dự Báo: Báo XỈU';
-            }, 1200);
-        }
-
-        db.ref('chats').limitToLast(20).on('value', snapshot => {
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML = '<div class="chat-msg"><span class="sys">System:</span> Chào mừng bạn tham gia hệ thống LC79 Server!</div>';
-            snapshot.forEach(child => {
-                const msg = child.val();
-                chatBox.innerHTML += `<div class="chat-msg"><b style="color:#00bcd4;">${msg.user}:</b> ${msg.text}</div>`;
+                    usersRef.push(newUserData).then(() => {
+                        msgDiv.className = "success";
+                        msgDiv.innerText = "Đăng ký thành công tài khoản mới!";
+                        checkAdminAccess(username);
+                    });
+                }
             });
-            chatBox.scrollTop = chatBox.scrollHeight;
         });
+    }
 
-        function sendChatMessage() {
-            const inp = document.getElementById('chat-input');
-            const txt = inp.value.trim();
-            if (!txt) return;
-            const u = loggedUser || 'Khách_' + Math.floor(Math.random() * 1000);
-            db.ref('chats').push({
-                user: u,
-                text: txt,
-                time: Date.now()
-            });
-            inp.value = '';
+    // Kiểm tra quyền Admin (Ví dụ: nếu tài khoản là 'admin' sẽ mở bảng quản trị toàn server)
+    function checkAdminAccess(username) {
+        if (username.toLowerCase() === 'admin') {
+            document.getElementById('admin-section').style.display = 'block';
+            loadAdminData();
+        } else {
+            document.getElementById('admin-section').style.display = 'none';
         }
-    });
+    }
+
+    // Lắng nghe dữ liệu Realtime toàn server cho trang Admin
+    function loadAdminData() {
+        const usersRef = db.ref('users');
+        usersRef.on('value', (snapshot) => {
+            const tableBody = document.getElementById('user-list-table');
+            tableBody.innerHTML = '';
+
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                const row = `<tr>
+                    <td>${data.username}</td>
+                    <td style="font-size:11px; color:#666;">${data.deviceId}</td>
+                    <td>${data.createdAt}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        });
+    }
 </script>
 
 </body>
